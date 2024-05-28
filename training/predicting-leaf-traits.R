@@ -5,28 +5,32 @@
 #' @author J. Antonio Guzmán Q., University of Minnesota
 
 #-------------------------------------------------------------------------------
-#' @step-1 Loading libraries
+#' @step-1 Loading libraries and source code
 
+# Libraries
 library(data.table)
 library(CWT)
 library(pls)
-library(caret)
 library(parallel)
+
+# Source code
+source("training/iterative_cross_valiation.R")
+
 
 #-------------------------------------------------------------------------------
 #' @step-2 Read files and define datasets
 
 # Read file
-file <- fread("data/spectra.csv", header = TRUE)
+file <- fread("data/file.csv", header = TRUE)
 
-# Select columns with metadata
-meta <- file
+# Sample ID (may be your metadata)
+sample_id <- file$Sample_ID
 
 # Select columns with leaf traits
-traits <- file[, .SD, .SDcols = c(17:20)]
+traits <- file[, .SD, .SDcols = c(2:6)]
 
 # Select columns with reflectance spectra
-reflectance <- file[, .SD, .SDcols = c(60:ncol(file))]
+reflectance <- file[, .SD, .SDcols = c(7:ncol(file))]
 
 #-------------------------------------------------------------------------------
 #' @step-3 Perform transformations and select regions of interest
@@ -42,29 +46,68 @@ wavelet <- cwt(reflectance,
                threads = 1L)
 
 #-------------------------------------------------------------------------------
-#' @step-4 Define partitions for training, testing, and cross-validation
+#' @step-4 Clean datasets and select range
+
+# Select trait
+trait <- traits$LMA
+
+# Cleaning for training
+reflectance <- reflectance[!is.na(trait), ]
+normalization <- normalization[!is.na(trait), ]
+wavelet <- wavelet[!is.na(trait), ]
+trait <- trait[!is.na(trait)]
+
+# Range
+reflectance <- reflectance[, .SD, ]
+normalization <- normalization[, .SD, ]
+wavelet <- wavelet[, .SD, ]
+
+#-------------------------------------------------------------------------------
+#' @step-5 Define partitions for training, testing, and cross-validation
+
 
 # Define vector for training (i.e, split) and testing (i.e, !split).
-split <- createDataPartition(y = 1:nrow(meta),
+split <- createDataPartition(y = 1:length(trait),
                              p = 0.6)
 split <- split$Resample1
 
 # Define cross-validation strategy
-# Create a vector file
-folds <- createFolds(y = split, 
-                     k = 10, 
-                     list = TRUE, 
-                     returnTrain = FALSE)
-
+icv <- iterative_cross_valiation((1:length(trait))[split],
+                                 psamples = 0.8,
+                                 k = 10,
+                                 times = 30)
 
 #-------------------------------------------------------------------------------
-#' @step-5 Define optimal numbers of components
+#' @step-6 Build models 
+
+threads <- 1
+
+ref_model <- models(trait = trait, 
+                    spectra = reflectance, 
+                    split = split,
+                    icv = icv,
+                    ncomp_max = 30,
+                    threads = 1)
+
+vn_model <- models(trait = trait, 
+                   spectra = normalization, 
+                   split = split,
+                   icv = icv,
+                   ncomp_max = 30,
+                   threads = 1)
+
+wav_model <- models(trait = trait, 
+                    spectra = wavelet, 
+                    split = split,
+                    icv = icv,
+                    ncomp_max = 30,
+                    threads = 1)
 
 #-------------------------------------------------------------------------------
-#' @step-6 Run final model
+#' @step-7 Run final model
 
 #-------------------------------------------------------------------------------
-#' @step-7 Evaluate performance
+#' @step-8 Evaluate performance
 
 #' #----------------------------------------------------------------------------
-#' @step-8 Evaluate importance of bands (VIP)
+#' @step-9 Evaluate importance of bands (VIP)
