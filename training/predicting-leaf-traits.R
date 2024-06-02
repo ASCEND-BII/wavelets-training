@@ -1,5 +1,5 @@
 ################################################################################
-#' @title Comparison of wavelet spectra for predicting leaf traits
+#' @title Comparison of methods for transforming spectra to predict leaf traits
 ################################################################################
 
 #' @author J. Antonio Guzmán Q., University of Minnesota

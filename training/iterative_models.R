@@ -1,9 +1,9 @@
-models <- function(trait, 
-                   spectra, 
-                   split,
-                   icv,
-                   ncomp_max = 30,
-                   threads) {
+iterative_models <- function(trait, 
+                             spectra, 
+                             split,
+                             icv,
+                             ncomp_max = 30,
+                             threads) {
   
   # Homogeneous segments
   frame <- cbind(trait_oi = trait, spectra)
