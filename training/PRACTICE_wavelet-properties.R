@@ -1,8 +1,17 @@
 ################################################################################
-#' @title Exploration of properties of wavelet spectra
+#' @title Exploration of properties of Continuous Wavelet Transformation
 ################################################################################
 
 #' @author J. Antonio Guzmán Q., University of Minnesota
+
+#' @description
+#' The goal of this script is to familiarize users on the application of CWT to
+#' time-series; specifically those that comes from spectroscopy. Steps 2 and 4 users
+#' will assess of amplitude and magnitude of the signals on resulting transformations.
+#' Steps 5 and 6 users will evaluate the impact of changes in frequencies and the
+#' presence of noise on resulting transformations. Finaly, steps 7 ans 8 provides
+#' examples on the application of signals of reflectance spectra from leaf and
+#' airborne spectroscopy derived from RTM. 
 
 #-------------------------------------------------------------------------------
 #' @step-1 Loading libraries
@@ -135,24 +144,21 @@ plot(wavelet_frecuency[1,750:950,3], wavelet_noise[1,750:950,3])
 # Let's get a leaf reflectance spectra using RTM (Prospect5)
 reflectance <-fRTM(rho~prospect5)
 plot(reflectance)
-
-# Let's make it a bit more real
 leaf_reflectance <- as.vector(reflectance)
-plot(leaf_reflectance)
 
 # Apply the CWT
 wavelet_leaf <- cwt(leaf_reflectance, 
-                      scales = 1:5)
+                      scales = 1:10)
 
 # Dimensions (samples, transformed signal, scales)
 dim(wavelet_leaf)
 
 # Play with the scales
-plot(wavelet_leaf[1,,1], ylim = range(wavelet_leaf), main = "Scale 1")
-plot(wavelet_leaf[1,,2], ylim = range(wavelet_leaf), main = "Scale 2")
-plot(wavelet_leaf[1,,3], ylim = range(wavelet_leaf), main = "Scale 3")
-plot(wavelet_leaf[1,,4], ylim = range(wavelet_leaf), main = "Scale 4")
-plot(wavelet_leaf[1,,5], ylim = range(wavelet_leaf), main = "Scale 5")
+plot(400:2500, wavelet_leaf[1,,1], ylim = range(wavelet_leaf), main = "Scale 1")
+plot(400:2500, wavelet_leaf[1,,2], ylim = range(wavelet_leaf), main = "Scale 2")
+plot(400:2500, wavelet_leaf[1,,4], ylim = range(wavelet_leaf), main = "Scale 4")
+plot(400:2500, wavelet_leaf[1,,6], ylim = range(wavelet_leaf), main = "Scale 6")
+plot(400:2500, wavelet_leaf[1,,8], ylim = range(wavelet_leaf), main = "Scale 8")
 
 # Let's apply noise
 noise <- rnorm(n = length(leaf_reflectance), sd = 0.001)
@@ -174,9 +180,10 @@ plot(wavelet_leaf_noise[1,,5], ylim = range(wavelet_leaf_noise), main = "Scale 5
 plot(wavelet_leaf[1,,4], ylim = range(wavelet_leaf), main = "Scale 3")
 plot(wavelet_leaf_noise[1,,4], ylim = range(wavelet_leaf), main = "Scale 3")
 plot(wavelet_leaf[1,,4], wavelet_leaf_noise[1,,4])
+abline(a = 0, b = 1)
 
 #-------------------------------------------------------------------------------
-#' @step-6 Example a bit more using canopy reflectance spectra from different
+#' @step-7 Example a bit more real using canopy reflectance spectra from different
 #' viewing-angles
 
 # Let's modify the viewing angle of 4SAIL
@@ -189,34 +196,25 @@ canopy_reflectance <- t(as.data.frame(canopy_reflectance))
 #  Directional hemispherical reflectance (rdot).
 #  Bi-directional reflectance (rsot).
 
+# Let's make the spectra a bit more real (4 nm band spacing0)
+canopy_reflectance <- canopy_reflectance[,seq(1, ncol(canopy_reflectance), 4)]
+
 # Apply the CWT
 wavelet_canopy <- cwt(as.data.table(canopy_reflectance),
-                      scales = 1:5)
+                      scales = 1:10)
 
 # Dimensions (samples, transformed signal, scales)
 dim(wavelet_canopy)
 
 # Play with the scales and types of reflectance
-scale <- 2
-plot(wavelet_canopy[1,,scale], ylim = range(wavelet_canopy), main = paste0("Bi-hemispherical reflectance - Scale ", scale))
-plot(wavelet_canopy[2,,scale], ylim = range(wavelet_canopy), main = paste0("Hemispherical directional reflectance - Scale ", scale))
-plot(wavelet_canopy[3,,scale], ylim = range(wavelet_canopy), main = paste0("Directional hemispherical reflectance - Scale ", scale))
-plot(wavelet_canopy[4,,scale], ylim = range(wavelet_canopy), main = paste0("Bi-directional reflectance - Scale ", scale))
+scale <- 5
+plot(seq(400, 2500, 4), wavelet_canopy[1,,scale], ylim = range(wavelet_canopy), main = paste0("Bi-hemispherical reflectance - Scale ", scale))
+plot(seq(400, 2500, 4), wavelet_canopy[2,,scale], ylim = range(wavelet_canopy), main = paste0("Hemispherical directional reflectance - Scale ", scale))
+plot(seq(400, 2500, 4), wavelet_canopy[3,,scale], ylim = range(wavelet_canopy), main = paste0("Directional hemispherical reflectance - Scale ", scale))
+plot(seq(400, 2500, 4), wavelet_canopy[4,,scale], ylim = range(wavelet_canopy), main = paste0("Bi-directional reflectance - Scale ", scale))
 
 # Compare rddt and rsdt
-plot(wavelet_canopy[1,100:2000,scale], wavelet_canopy[4,100:2000,scale])
-
-##### How CWT compares with vector normalization
-# Let's apply the vector normalization
-normalization <- sqrt(apply(canopy_reflectance^2, 1, sum, na.rm = TRUE))
-normalization <- canopy_reflectance / normalization
-
-# Play with the normalization on different types of reflectance
-plot(normalization[1,], ylim = range(normalization), main = paste0("Bi-hemispherical reflectance"))
-plot(normalization[2,], ylim = range(normalization), main = paste0("Hemispherical directional reflectance"))
-plot(normalization[3,], ylim = range(normalization), main = paste0("Directional hemispherical reflectance"))
-plot(normalization[4,], ylim = range(normalization), main = paste0("Bi-directional reflectance"))
-plot(normalization[1,100:2000], normalization[4,100:2000]) # It is good!
-
-# 
-
+plot(canopy_reflectance[1,5:520], canopy_reflectance[4,5:520], main = "Reflectance")
+abline(a = 0, b = 1)
+plot(wavelet_canopy[1,5:520,scale], wavelet_canopy[4,5:520,scale], main = "Wavelet")
+abline(a = 0, b = 1)

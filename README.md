@@ -12,12 +12,13 @@ Users will also have to clone though Github or download this repository in their
 local computer. Then, install the following libraries:
 
 ```
-install.packages(data.table)
-install.packages(CWT)
-install.packages(pls)
-install.packages(plsVarSel)
-install.packages(parallel)
-install.packages(ggplot2)
+install.packages("data.table")
+install.packages("CWT")
+install.packages("ccrtm")
+install.packages("pls")
+install.packages("plsVarSel")
+install.packages("parallel")
+install.packages("ggplot2")
 ```
 
 <br />
