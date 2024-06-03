@@ -19,6 +19,7 @@ install.packages("pls")
 install.packages("plsVarSel")
 install.packages("parallel")
 install.packages("ggplot2")
+install.packages("viridis")
 ```
 
 <br />

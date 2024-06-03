@@ -20,6 +20,7 @@
 library(data.table)
 library(CWT)
 library(ccrtm)
+library(viridis)
 
 #-------------------------------------------------------------------------------
 #' @step-2 A basic wavelet application using a time-series with changes 
@@ -39,7 +40,11 @@ plot(signal_amplitude)
 
 # Apply the CWT
 wavelet_amplitude <- cwt(signal_amplitude,
-                         scales = 1:5)
+                         scales = 1:30)
+
+figure_scalogram(signal = signal_amplitude,
+                 scales = 1:30,
+                 wavelenghts = 1:length(signal_amplitude))
 
 # Dimensions (samples, transformed signal, scales)
 dim(wavelet_amplitude)
@@ -62,6 +67,10 @@ plot(signal_amplitude, higher_magnitude)
 # Apply the CWT
 wavelet_higher_magnitude <- cwt(higher_magnitude,
                                 scales = 1:5)
+
+figure_scalogram(signal = higher_magnitude,
+                 scales = 1:30,
+                 wavelenghts = 1:length(higher_magnitude))
 
 # Dimensions (samples, transformed signal, scales)
 dim(wavelet_higher_magnitude)
@@ -96,7 +105,11 @@ plot(signal_frecuency, type = "l")
 
 # Apply the CWT
 wavelet_frecuency <- cwt(signal_frecuency,
-                         scales = 1:5)
+                         scales = 1:30)
+
+figure_scalogram(signal = signal_frecuency,
+                 scales = 1:30,
+                 wavelenghts = 1:length(signal_frecuency))
 
 # Dimensions (samples, transformed signal, scales)
 dim(wavelet_frecuency)
@@ -119,7 +132,11 @@ plot(signal_frecuency, signal_noise)
 
 # Apply the CWT
 wavelet_noise <- cwt(signal_noise,
-                     scales = 1:5)
+                     scales = 1:30)
+
+figure_scalogram(signal = signal_noise,
+                 scales = 1:30,
+                 wavelenghts = 1:length(signal_noise))
 
 # Dimensions (samples, transformed signal, scales)
 dim(wavelet_noise)
@@ -148,7 +165,11 @@ leaf_reflectance <- as.vector(reflectance)
 
 # Apply the CWT
 wavelet_leaf <- cwt(leaf_reflectance, 
-                      scales = 1:10)
+                      scales = 1:30)
+
+figure_scalogram(signal = leaf_reflectance,
+                 scales = 1:30,
+                 wavelenghts = 400:2500)
 
 # Dimensions (samples, transformed signal, scales)
 dim(wavelet_leaf)
@@ -167,7 +188,11 @@ plot(leaf_noise, type = "l")
 
 # Apply the CWT
 wavelet_leaf_noise <- cwt(leaf_noise,
-                          scales = 1:5)
+                          scales = 1:30)
+
+figure_scalogram(signal = leaf_noise,
+                 scales = 1:30,
+                 wavelenghts = 400:2500)
 
 # Play with the scales
 plot(wavelet_leaf_noise[1,,1], ylim = range(wavelet_leaf_noise), main = "Scale 1")
@@ -177,8 +202,8 @@ plot(wavelet_leaf_noise[1,,4], ylim = range(wavelet_leaf_noise), main = "Scale 4
 plot(wavelet_leaf_noise[1,,5], ylim = range(wavelet_leaf_noise), main = "Scale 5")
 
 # Compare signals 
-plot(wavelet_leaf[1,,4], ylim = range(wavelet_leaf), main = "Scale 3")
-plot(wavelet_leaf_noise[1,,4], ylim = range(wavelet_leaf), main = "Scale 3")
+plot(wavelet_leaf[1,,20], ylim = range(wavelet_leaf), main = "Scale 20")
+plot(wavelet_leaf_noise[1,,20], ylim = range(wavelet_leaf), main = "Scale 20")
 plot(wavelet_leaf[1,,4], wavelet_leaf_noise[1,,4])
 abline(a = 0, b = 1)
 
@@ -201,7 +226,7 @@ canopy_reflectance <- canopy_reflectance[,seq(1, ncol(canopy_reflectance), 4)]
 
 # Apply the CWT
 wavelet_canopy <- cwt(as.data.table(canopy_reflectance),
-                      scales = 1:10)
+                      scales = 1:5)
 
 # Dimensions (samples, transformed signal, scales)
 dim(wavelet_canopy)
