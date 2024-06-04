@@ -20,6 +20,7 @@
 library(data.table)
 library(CWT)
 library(ccrtm)
+library(ggplot2)
 library(viridis)
 
 #-------------------------------------------------------------------------------
@@ -151,9 +152,6 @@ plot(wavelet_noise[1,,5], ylim = range(wavelet_noise), main = "Scale 5")
 # Let's compare signals with different noise but same frequencies
 plot(wavelet_frecuency[1,,3], ylim = range(signal_frecuency), main = "Scale 3")
 plot(wavelet_noise[1,,3], ylim = range(signal_frecuency), main = "Scale 3")
-plot(wavelet_frecuency[1,50:250,3], wavelet_noise[1,50:250,3])
-plot(wavelet_frecuency[1,250:750,3], wavelet_noise[1,250:750,3])
-plot(wavelet_frecuency[1,750:950,3], wavelet_noise[1,750:950,3])
 
 #-------------------------------------------------------------------------------
 #' @step-6 Example a bit more real using leaf reflectance spectra and noise
@@ -165,7 +163,7 @@ leaf_reflectance <- as.vector(reflectance)
 
 # Apply the CWT
 wavelet_leaf <- cwt(leaf_reflectance, 
-                      scales = 1:30)
+                      scales = 1:5)
 
 figure_scalogram(signal = leaf_reflectance,
                  scales = 1:30,
@@ -177,9 +175,9 @@ dim(wavelet_leaf)
 # Play with the scales
 plot(400:2500, wavelet_leaf[1,,1], ylim = range(wavelet_leaf), main = "Scale 1")
 plot(400:2500, wavelet_leaf[1,,2], ylim = range(wavelet_leaf), main = "Scale 2")
+plot(400:2500, wavelet_leaf[1,,3], ylim = range(wavelet_leaf), main = "Scale 3")
 plot(400:2500, wavelet_leaf[1,,4], ylim = range(wavelet_leaf), main = "Scale 4")
-plot(400:2500, wavelet_leaf[1,,6], ylim = range(wavelet_leaf), main = "Scale 6")
-plot(400:2500, wavelet_leaf[1,,8], ylim = range(wavelet_leaf), main = "Scale 8")
+plot(400:2500, wavelet_leaf[1,,5], ylim = range(wavelet_leaf), main = "Scale 5")
 
 # Let's apply noise
 noise <- rnorm(n = length(leaf_reflectance), sd = 0.001)
@@ -228,6 +226,10 @@ canopy_reflectance <- canopy_reflectance[,seq(1, ncol(canopy_reflectance), 4)]
 wavelet_canopy <- cwt(as.data.table(canopy_reflectance),
                       scales = 1:5)
 
+figure_scalogram(signal = canopy_reflectance[4,],
+                 scales = 1:30,
+                 wavelenghts = seq(400, 2500, 4))
+
 # Dimensions (samples, transformed signal, scales)
 dim(wavelet_canopy)
 
@@ -243,3 +245,48 @@ plot(canopy_reflectance[1,5:520], canopy_reflectance[4,5:520], main = "Reflectan
 abline(a = 0, b = 1)
 plot(wavelet_canopy[1,5:520,scale], wavelet_canopy[4,5:520,scale], main = "Wavelet")
 abline(a = 0, b = 1)
+
+#-------------------------------------------------------------------------------
+#' @step-8 Example comparing vector normalization and CWT on canopy reflectance 
+#' spectra with and without potential artifacts 
+
+# Lets copy our previews canopy spectra
+reflectance <- canopy_reflectance[1,] # A sample
+reflectance <- rbind(reflectance, reflectance) # Two sample with the same values
+reflectance <- data.frame(reflectance)
+colnames(reflectance) <- as.character(seq(400, 2500, 4))
+
+# Let's add noise in our last sample
+reflectance$"952"[2] <- 0.60
+reflectance$"1100"[2] <- 0.60
+
+# Plot
+plot(seq(400, 2500, 4), as.matrix(reflectance)[1,], ylim = range(reflectance), type = "l", main = "Without artifacts")
+plot(seq(400, 2500, 4), as.matrix(reflectance)[2,], ylim = range(reflectance), type = "l", main = "With artifacts")
+
+# Apply vector normalization
+normalization <- sqrt(apply(reflectance^2, 1, sum, na.rm = TRUE))
+normalization <- reflectance / normalization
+
+plot(seq(400, 2500, 4), as.matrix(normalization)[1,], ylim = range(normalization), type = "l", main = "VN without artifacts")
+plot(seq(400, 2500, 4), as.matrix(normalization)[2,], ylim = range(normalization), type = "l", main = "VN With artifacts")
+
+# Apply CWT
+wavelet_canopy <- cwt(as.data.table(reflectance),
+                      scales = 1:10)
+
+plot(seq(400, 2500, 4), wavelet_canopy[1,,1], ylim = range(wavelet_canopy), type = "l", main = "Wavelet without artifacts (Scale 1)")
+plot(seq(400, 2500, 4), wavelet_canopy[2,,1], ylim = range(wavelet_canopy), type = "l", main = "Wavelet with artifacts (Scale 1)")
+
+plot(seq(400, 2500, 4), wavelet_canopy[1,,5], ylim = range(wavelet_canopy), type = "l", main = "Wavelet without artifacts (Scale 10)")
+plot(seq(400, 2500, 4), wavelet_canopy[2,,5], ylim = range(wavelet_canopy), type = "l", main = "Wavelet With artifacts (Scale 10)")
+
+# Look at the scalograms
+figure_scalogram(signal = as.matrix(reflectance)[1,],
+                 scales = 1:10,
+                 wavelenghts = seq(400, 2500, 4))
+
+figure_scalogram(signal = as.matrix(reflectance)[2,],
+                 scales = 1:10,
+                 wavelenghts = seq(400, 2500, 4))
+

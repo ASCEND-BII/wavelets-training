@@ -73,7 +73,7 @@ normalization <- reflectance / normalization
 
 # Estimate wavelet spectra
 wavelet <- cwt(reflectance, 
-               scales = c(3, 5, 7),
+               scales = c(3, 4, 5),
                summed_wavelet = TRUE,
                threads = 1L)
 
@@ -149,7 +149,7 @@ figure_PRESS(ref_press, PRESS_range = range(ref_press), title = "Reflectance")
 figure_PRESS(vn_press, PRESS_range = range(ref_press), title = "Vector Normalization")
 figure_PRESS(wav_press, PRESS_range = range(ref_press), title = "Wavelet")
 
-ncomp_models <- c(21, 21, 7)
+ncomp_models <- c(16, 15, 14)
 
 #-------------------------------------------------------------------------------
 #' @step-9 Evaluate the Value of Importance in Projection
@@ -218,3 +218,14 @@ figure_obs_pred(observed = trait[-split],
                 performance = wav_performance,
                 title = "Wavelet")
 
+# Compare performance
+ref_performance$type <- "Reflectance"
+vn_performance$type <- "Vector Normalization"
+wav_performance$type <- "Wavelet"
+
+performance <- rbind(ref_performance, vn_performance, wav_performance)
+
+boxplot(performance$R2 ~ performance$type, ylab = "R2")
+boxplot(performance$BIAS ~ performance$type, ylab = "BIAS")
+boxplot(performance$RMSE ~ performance$type, ylab = "RMSE")
+boxplot(performance$perRMSE ~ performance$type, ylab = "%RMSE")

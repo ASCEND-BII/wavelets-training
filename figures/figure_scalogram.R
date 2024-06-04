@@ -25,14 +25,14 @@ figure_scalogram <- function(signal,
   final_melt <- final_melt[Wavelength <= (max(wavelenghts) - max(scales)),]
   quantile <- final_melt
   
-  plot <- ggplot(data = final_melt, aes(x= Wavelength, y= scales, fill = Value)) + 
+  plot <- ggplot(data = final_melt, aes(x= Wavelength, y= scales, fill = log2(abs(Value)))) + 
     geom_raster() +
     ylab("Scales") +
     #scale_y_continuous(trans='log2') +
     #scale_fill_distiller("Value", palette = "RdBu", expand = c(0,0), limits = c(-values_max, values_max)) +
-    scale_fill_viridis_c(option = "turbo", 
-                         limits = quantile(final_melt$Value, c(0.05, 0.95)),
-                         oob = scales::squish) +
+    scale_fill_viridis_c(option = "turbo") + 
+                         #limits = c(0, quantile(final_melt$Value, c(0.99))),
+                         #oob = scales::squish) +
     #scale_y_continuous(breaks = scales) +
     coord_cartesian(expand = FALSE) +
     theme_bw()

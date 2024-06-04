@@ -1,7 +1,7 @@
 # wavelets-training
 
-A repository for the use training on "Continuous Wavelet Transformation for Spectroscopy"
-at ASCEND summer training 2024
+A repository for the use training on "Continuous Wavelet Transformation for 
+Spectroscopy" at ASCEND summer training 2024
 
 <br />
 
